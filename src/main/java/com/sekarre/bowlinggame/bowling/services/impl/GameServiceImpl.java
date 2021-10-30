@@ -35,8 +35,8 @@ public class GameServiceImpl implements GameService {
     public GameDto getUpdatedGame(UUID gameId) {
         Game game = getGameById(gameId);
 
-        if (game.isGameEnded()) {
-            throw new IllegalStateException("Game ended");
+        if (gameEngine.isEndGame(game)) {
+            return gameMapper.mapGameToGameDto(gameEngine.closeGame(game));
         }
 
         Player player = playerService.getPlayerById(game.getCurrentMovingPlayer().getId());

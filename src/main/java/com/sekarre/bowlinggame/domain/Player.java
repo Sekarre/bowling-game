@@ -1,11 +1,9 @@
 package com.sekarre.bowlinggame.domain;
 
-import com.sekarre.bowlinggame.domain.enums.SpecialScoreType;
+import com.sekarre.bowlinggame.domain.enums.ScoreType;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
-import java.util.UUID;
 
 @Setter
 @Getter
@@ -23,11 +21,13 @@ public class Player {
 
     private String name;
 
-    private Integer score = 0;
-
     private Integer lastHitPinsCount;
 
-    private SpecialScoreType specialScoreType;
+    private Integer score = 0;
+
+    private Integer bonusStrikeScore = 0;
+
+    private ScoreType scoreType;
 
     private Integer turnOfRound = 1;
 

@@ -4,12 +4,14 @@ import com.sekarre.bowlinggame.bowling.repositories.GameRepository;
 import com.sekarre.bowlinggame.bowling.repositories.PlayerRepository;
 import com.sekarre.bowlinggame.domain.Game;
 import com.sekarre.bowlinggame.domain.Player;
-import com.sekarre.bowlinggame.domain.enums.SpecialScoreType;
+import com.sekarre.bowlinggame.domain.enums.ScoreType;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.springframework.stereotype.Component;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 import static com.sekarre.bowlinggame.domain.enums.GameProperties.*;
 
@@ -48,28 +50,63 @@ public class GameEngine {
 
         player.setLastHitPinsCount(hitPins);
 
-        if (player.getSpecialScoreType() != null) {
-            player.setScore(getStrikeScore(hitPins, player));
-            return playerRepository.save(player);
+        if (player.getScoreType() != null && player.getScoreType().equals(ScoreType.SPARE)) {
+            setSpareScore(hitPins, player);
         }
 
-        if (hitPins.equals(MAX_PINS) && player.getTurnOfRound().equals(FIRST_TURN)) {
-            player.setSpecialScoreType(SpecialScoreType.STRIKE);
-            player.setScore(player.getScore() + SpecialScoreType.STRIKE.getScore());
-
-            return playerRepository.save(player);
+        if (player.getScoreType() != null && player.getScoreType().equals(ScoreType.STRIKE)) {
+            setStrikeScore(hitPins, player);
         }
 
-        if (hitPins.equals(MAX_PINS) && player.getTurnOfRound().equals(LAST_TURN)) {
-            player.setSpecialScoreType(SpecialScoreType.SPARE);
-            player.setScore(player.getScore() + SpecialScoreType.SPARE.getScore());
-
-            return playerRepository.save(player);
+        //if spare or strike
+        if (hitPins.equals(MAX_PINS)) {
+            return setScoreSpareOrStrike(player);
         }
 
+        //default
         player.setScore(player.getScore() + hitPins);
 
         return playerRepository.save(player);
+    }
+
+    private void setSpareScore(Integer hitPins, Player player) {
+        player.setScore(getSpareScore(hitPins, player));
+        player.setScoreType(null);
+    }
+
+    private void setStrikeScore(Integer hitPins, Player player) {
+        if (player.getTurnOfRound().equals(FIRST_TURN)) {
+            player.setBonusStrikeScore(hitPins);
+        } else {
+            player.setScore(getStrikeScore(hitPins, player));
+            player.setScoreType(null);
+        }
+    }
+
+    private Player setScoreSpareOrStrike(Player player) {
+        if (player.getTurnOfRound().equals(LAST_TURN)) {
+            setScore(player, ScoreType.SPARE);
+        } else {
+            setScore(player, ScoreType.STRIKE);
+            player.setTurnOfRound(LAST_TURN);
+        }
+
+        return playerRepository.save(player);
+    }
+
+    private Player setScore(Player player, ScoreType scoreType) {
+        player.setScoreType(scoreType);
+        player.setScore(player.getScore() + scoreType.getScore());
+
+        return player;
+    }
+
+    private Integer getStrikeScore(Integer hitPins, Player player) {
+        return player.getScore() + hitPins + ScoreType.STRIKE.getScore() + player.getBonusStrikeScore();
+    }
+
+    private Integer getSpareScore(Integer hitPins, Player player) {
+        return (player.getScore() + hitPins + ScoreType.SPARE.getScore());
     }
 
     public Game setNextTurn(Player player, Game game) {
@@ -90,13 +127,24 @@ public class GameEngine {
         return gameRepository.save(game);
     }
 
-    private boolean isNextRound(List<Player> players, Player currentPlayer) {
-        return players.stream().noneMatch(p -> p.getNumberInQueue().equals((currentPlayer.getNumberInQueue() + 1)));
+    public boolean isEndGame(Game game) {
+        return game.getCurrentRound() > MAX_ROUND;
     }
 
-    private Integer getStrikeScore(Integer hitPins, Player player) {
-        return player.getTurnOfRound().equals(LAST_TURN) ?
-                player.getScore() + hitPins + SpecialScoreType.STRIKE.getScore() :
-                player.getScore() + hitPins;
+    public Game closeGame(Game game) {
+        game.setGameEnded(true);
+        game.setWinner(determineWinner(game).getName());
+
+        return game;
+    }
+
+    private Player determineWinner(Game game) {
+        Optional<Player> winner = game.getPlayers().stream().max(Comparator.comparingInt(Player::getScore));
+
+        return winner.orElse(Player.builder().name("Draw").build());
+    }
+
+    private boolean isNextRound(List<Player> players, Player currentPlayer) {
+        return players.stream().noneMatch(p -> p.getNumberInQueue().equals((currentPlayer.getNumberInQueue() + 1)));
     }
 }

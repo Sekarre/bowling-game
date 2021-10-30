@@ -10,5 +10,8 @@ import lombok.*;
 public class PlayerDtoShort {
 
     private Long id;
+
+    private String name;
+
     private Integer turnOfRound;
 }

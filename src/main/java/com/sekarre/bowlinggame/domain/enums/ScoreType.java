@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum SpecialScoreType {
+public enum ScoreType {
     STRIKE(10),
     SPARE(10);
 

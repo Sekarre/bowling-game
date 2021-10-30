@@ -1,6 +1,6 @@
 package com.sekarre.bowlinggame.bowling.dto;
 
-import com.sekarre.bowlinggame.domain.enums.SpecialScoreType;
+import com.sekarre.bowlinggame.domain.enums.ScoreType;
 import lombok.*;
 
 @Setter
@@ -12,13 +12,15 @@ public class PlayerDto {
 
     private Long id;
 
+    private String name;
+
     private Integer numberInQueue;
 
     private Integer playerScore;
 
     private Integer lastHitPinsCount;
 
-    private SpecialScoreType specialScoreType;
+    private ScoreType scoreType;
 
     private Integer turnOfRound;
 }
