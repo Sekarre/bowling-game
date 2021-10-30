@@ -10,21 +10,11 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class GameDto {
+public class NewGameDto {
 
     private UUID id;
 
-    private Integer playersCount;
-
-    private Integer currentRound;
-
-    private Integer totalRound;
-
-    private boolean gameEnded;
-
-    private String winner;
+    private List<PlayerDto> players;
 
     private PlayerDtoShort currentMovingPlayer;
-
-    private List<PlayerDto> players;
 }

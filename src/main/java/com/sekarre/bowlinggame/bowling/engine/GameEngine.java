@@ -1,4 +1,4 @@
-package com.sekarre.bowlinggame.bowling.util;
+package com.sekarre.bowlinggame.bowling.engine;
 
 import com.sekarre.bowlinggame.bowling.repositories.GameRepository;
 import com.sekarre.bowlinggame.bowling.repositories.PlayerRepository;
@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.sekarre.bowlinggame.domain.enums.GameProperties.*;
@@ -23,19 +22,19 @@ public class GameEngine {
     private final PlayerGenerator playerGenerator;
 
     public Game generateNewGame(Integer playersCount) {
-        List<Player> players = playerGenerator.createPlayers(playersCount);
-        players = playerRepository.saveAll(players);
-
         Game newGame = Game.builder()
                 .playersCount(playersCount)
                 .currentRound(1)
                 .totalRound(10)
                 .gameEnded(false)
                 .winner("")
-                .players(players)
                 .build();
 
-        newGame.setCurrentPlayerMoving(newGame.getPlayers().get(0));
+        List<Player> players = playerGenerator.createPlayers(playersCount, newGame);
+        playerRepository.saveAll(players);
+
+        newGame.setPlayers(players);
+        newGame.setCurrentMovingPlayer(newGame.getPlayers().get(0));
 
         return newGame;
     }
@@ -47,9 +46,10 @@ public class GameEngine {
 
     public Player setPlayerScore(Integer hitPins, Player player) {
 
+        player.setLastHitPinsCount(hitPins);
+
         if (player.getSpecialScoreType() != null) {
             player.setScore(getStrikeScore(hitPins, player));
-
             return playerRepository.save(player);
         }
 
@@ -74,24 +74,29 @@ public class GameEngine {
 
     public Game setNextTurn(Player player, Game game) {
         if (player.getTurnOfRound().equals(LAST_TURN)) {
-            game.setCurrentRound(game.getCurrentRound() + 1);
-            game.setCurrentPlayerMoving(game.getPlayers().stream()
+            if (isNextRound(game.getPlayers(), player)) {
+                game.setCurrentRound(game.getCurrentRound() + 1);
+            }
+            game.setCurrentMovingPlayer(game.getPlayers().stream()
                     .filter(p -> p.getNumberInQueue().equals((player.getNumberInQueue() + 1) % game.getPlayersCount()))
                     .findFirst()
                     .orElse(null));
-            player.setTurnOfRound(FIRST_TURN);
 
-            return gameRepository.save(game);
+            player.setTurnOfRound(FIRST_TURN);
         } else {
             player.setTurnOfRound(LAST_TURN);
-
-            return game;
         }
+
+        return gameRepository.save(game);
+    }
+
+    private boolean isNextRound(List<Player> players, Player currentPlayer) {
+        return players.stream().noneMatch(p -> p.getNumberInQueue().equals((currentPlayer.getNumberInQueue() + 1)));
     }
 
     private Integer getStrikeScore(Integer hitPins, Player player) {
         return player.getTurnOfRound().equals(LAST_TURN) ?
-                hitPins + SpecialScoreType.STRIKE.getScore() :
-                hitPins;
+                player.getScore() + hitPins + SpecialScoreType.STRIKE.getScore() :
+                player.getScore() + hitPins;
     }
 }

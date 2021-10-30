@@ -16,24 +16,22 @@ import java.util.UUID;
 public class Player {
 
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-            name = "UUID",
-            strategy = "org.hibernate.id.UUIDGenerator"
-    )
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private Integer numberInQueue;
 
     private String name;
 
-    private Integer score;
+    private Integer score = 0;
+
+    private Integer lastHitPinsCount;
 
     private SpecialScoreType specialScoreType;
 
-    private Integer turnOfRound;
+    private Integer turnOfRound = 1;
 
     @JoinColumn(name = "game_id")
-    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.DETACH, CascadeType.REFRESH})
     private Game game;
 }

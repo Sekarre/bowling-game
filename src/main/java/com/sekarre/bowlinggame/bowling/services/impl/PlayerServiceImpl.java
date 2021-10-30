@@ -20,7 +20,7 @@ public class PlayerServiceImpl implements PlayerService {
         playerRepository.delete(player);
     }
 
-    public Player getPlayerById(UUID playerId) {
+    public Player getPlayerById(Long playerId) {
         return playerRepository.findById(playerId).orElseThrow(() -> new NotFoundException("Player not found"));
     }
 }

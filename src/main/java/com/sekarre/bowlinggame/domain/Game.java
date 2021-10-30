@@ -38,10 +38,10 @@ public class Game {
 
     private String winner;
 
-    @JoinColumn(name = "player_od")
+    @JoinColumn(name = "player_id")
     @ManyToOne
-    private Player currentPlayerMoving;
+    private Player currentMovingPlayer;
 
-    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Player> players;
 }
