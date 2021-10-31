@@ -9,9 +9,6 @@ import org.mapstruct.Mapping;
 @Mapper
 public abstract class PlayerMapper {
 
-    @Mapping(source = "playerScore", target = "score")
-    public abstract Player mapPlayerDtoToPlayer(PlayerDto playerDto);
-
     @Mapping(target = "playerScore", source = "score")
     public abstract PlayerDto mapPlayerToPlayerDto(Player player);
 

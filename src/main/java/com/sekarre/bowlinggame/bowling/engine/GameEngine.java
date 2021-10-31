@@ -6,7 +6,6 @@ import com.sekarre.bowlinggame.domain.Game;
 import com.sekarre.bowlinggame.domain.Player;
 import com.sekarre.bowlinggame.domain.enums.ScoreType;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.math3.random.RandomDataGenerator;
 import org.springframework.stereotype.Component;
 
 import java.util.Comparator;
@@ -22,6 +21,7 @@ public class GameEngine {
     private final GameRepository gameRepository;
     private final PlayerRepository playerRepository;
     private final PlayerGenerator playerGenerator;
+    private final ScoreGenerator scoreGenerator;
 
     public Game generateNewGame(Integer playersCount) {
         Game newGame = Game.builder()
@@ -38,12 +38,11 @@ public class GameEngine {
         newGame.setPlayers(players);
         newGame.setCurrentMovingPlayer(newGame.getPlayers().get(0));
 
-        return newGame;
+        return gameRepository.save(newGame);
     }
 
-    public Integer generateRandomPinsHit(Integer lastHitPinsCount) {
-        RandomDataGenerator randomDataGenerator = new RandomDataGenerator();
-        return randomDataGenerator.nextInt(0, MAX_PINS - lastHitPinsCount);
+    public Integer generateRandomPinsHit(Integer thisRoundHitPinsCount) {
+        return scoreGenerator.generateRandomPinsHit(thisRoundHitPinsCount);
     }
 
     public Player setPlayerScore(Integer hitPins, Player player) {
@@ -67,6 +66,38 @@ public class GameEngine {
         player.setScore(player.getScore() + hitPins);
 
         return playerRepository.save(player);
+    }
+
+    public Game setNextTurn(Player player, Game game) {
+        game.setLastHitPins(player.getThisRoundHitPinsCount());
+
+        if (player.getTurnOfRound().equals(LAST_TURN)) {
+            if (isNextRound(game.getPlayers(), player)) {
+                game.setCurrentRound(game.getCurrentRound() + 1);
+                game.getPlayers().forEach(p -> p.setThisRoundHitPinsCount(0));
+            }
+            game.setCurrentMovingPlayer(game.getPlayers().stream()
+                    .filter(p -> p.getNumberInQueue().equals((player.getNumberInQueue() + 1) % game.getPlayersCount()))
+                    .findFirst()
+                    .orElse(null));
+
+            player.setTurnOfRound(FIRST_TURN);
+        } else {
+            player.setTurnOfRound(LAST_TURN);
+        }
+
+        return gameRepository.save(game);
+    }
+
+    public boolean isEndGame(Game game) {
+        return game.getCurrentRound() > MAX_ROUND;
+    }
+
+    public Game closeGame(Game game) {
+        game.setGameEnded(true);
+        game.setWinner(determineWinner(game).getName());
+
+        return gameRepository.save(game);
     }
 
     private void setSpareScore(Integer hitPins, Player player) {
@@ -107,37 +138,6 @@ public class GameEngine {
         return (player.getScore() + hitPins + ScoreType.SPARE.getScore());
     }
 
-    public Game setNextTurn(Player player, Game game) {
-        game.setLastHitPins(player.getThisRoundHitPinsCount());
-
-        if (player.getTurnOfRound().equals(LAST_TURN)) {
-            if (isNextRound(game.getPlayers(), player)) {
-                game.setCurrentRound(game.getCurrentRound() + 1);
-                game.getPlayers().forEach(p -> p.setThisRoundHitPinsCount(0));
-            }
-            game.setCurrentMovingPlayer(game.getPlayers().stream()
-                    .filter(p -> p.getNumberInQueue().equals((player.getNumberInQueue() + 1) % game.getPlayersCount()))
-                    .findFirst()
-                    .orElse(null));
-
-            player.setTurnOfRound(FIRST_TURN);
-        } else {
-            player.setTurnOfRound(LAST_TURN);
-        }
-
-        return gameRepository.save(game);
-    }
-
-    public boolean isEndGame(Game game) {
-        return game.getCurrentRound() > MAX_ROUND;
-    }
-
-    public Game closeGame(Game game) {
-        game.setGameEnded(true);
-        game.setWinner(determineWinner(game).getName());
-
-        return game;
-    }
 
     private Player determineWinner(Game game) {
         Optional<Player> winner = game.getPlayers().stream().max(Comparator.comparingInt(Player::getScore));
@@ -148,4 +148,5 @@ public class GameEngine {
     private boolean isNextRound(List<Player> players, Player currentPlayer) {
         return players.stream().noneMatch(p -> p.getNumberInQueue().equals((currentPlayer.getNumberInQueue() + 1)));
     }
+
 }

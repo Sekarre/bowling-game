@@ -11,4 +11,5 @@ public class GameProperties {
     public static final Integer LAST_TURN = 2;
     public static final Integer MAX_ROUND = 10;
     public static final Integer MAX_PLAYERS = 40;
+    public static final GameMode GAME_MODE = GameMode.NORMAL;
 }

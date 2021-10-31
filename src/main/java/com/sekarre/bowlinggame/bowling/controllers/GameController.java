@@ -1,7 +1,6 @@
 package com.sekarre.bowlinggame.bowling.controllers;
 
 import com.sekarre.bowlinggame.bowling.dto.GameDto;
-import com.sekarre.bowlinggame.bowling.dto.NewGameDto;
 import com.sekarre.bowlinggame.bowling.services.GameService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -27,12 +26,12 @@ public class GameController {
     }
 
     @GetMapping("/game/{gameId}")
-    public ResponseEntity<GameDto> getNewGame(@PathVariable UUID gameId) {
+    public ResponseEntity<GameDto> getExistingGame(@PathVariable UUID gameId) {
         return ResponseEntity.ok(gameService.getGame(gameId));
     }
 
     @GetMapping("/game-update/{gameId}")
-    public ResponseEntity<GameDto> updateGame(@PathVariable UUID gameId) {
+    public ResponseEntity<GameDto> getUpdatedGame(@PathVariable UUID gameId) {
         return ResponseEntity.ok(gameService.getUpdatedGame(gameId));
     }
 }

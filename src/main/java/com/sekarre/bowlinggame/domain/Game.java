@@ -4,10 +4,8 @@ import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
-import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Setter

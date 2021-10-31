@@ -31,7 +31,7 @@ public class GameServiceImpl implements GameService {
     public GameDto getNewGame(Integer playersCount) {
         Game game = gameEngine.generateNewGame(playersCount);
 
-        return gameMapper.mapGameToGameDto(gameRepository.save(game));
+        return gameMapper.mapGameToGameDto(game);
     }
 
     @Override

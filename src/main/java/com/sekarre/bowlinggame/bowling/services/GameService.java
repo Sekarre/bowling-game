@@ -1,7 +1,6 @@
 package com.sekarre.bowlinggame.bowling.services;
 
 import com.sekarre.bowlinggame.bowling.dto.GameDto;
-import com.sekarre.bowlinggame.bowling.dto.NewGameDto;
 
 import java.util.UUID;
 
