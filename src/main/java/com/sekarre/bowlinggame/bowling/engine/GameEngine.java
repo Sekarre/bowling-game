@@ -41,14 +41,14 @@ public class GameEngine {
         return newGame;
     }
 
-    public Integer generateRandomPinsHit() {
+    public Integer generateRandomPinsHit(Integer lastHitPinsCount) {
         RandomDataGenerator randomDataGenerator = new RandomDataGenerator();
-        return randomDataGenerator.nextInt(0, 10);
+        return randomDataGenerator.nextInt(0, MAX_PINS - lastHitPinsCount);
     }
 
     public Player setPlayerScore(Integer hitPins, Player player) {
 
-        player.setLastHitPinsCount(hitPins);
+        player.setThisRoundHitPinsCount(hitPins + player.getThisRoundHitPinsCount());
 
         if (player.getScoreType() != null && player.getScoreType().equals(ScoreType.SPARE)) {
             setSpareScore(hitPins, player);
@@ -94,11 +94,9 @@ public class GameEngine {
         return playerRepository.save(player);
     }
 
-    private Player setScore(Player player, ScoreType scoreType) {
+    private void setScore(Player player, ScoreType scoreType) {
         player.setScoreType(scoreType);
         player.setScore(player.getScore() + scoreType.getScore());
-
-        return player;
     }
 
     private Integer getStrikeScore(Integer hitPins, Player player) {
@@ -110,9 +108,12 @@ public class GameEngine {
     }
 
     public Game setNextTurn(Player player, Game game) {
+        game.setLastHitPins(player.getThisRoundHitPinsCount());
+
         if (player.getTurnOfRound().equals(LAST_TURN)) {
             if (isNextRound(game.getPlayers(), player)) {
                 game.setCurrentRound(game.getCurrentRound() + 1);
+                game.getPlayers().forEach(p -> p.setThisRoundHitPinsCount(0));
             }
             game.setCurrentMovingPlayer(game.getPlayers().stream()
                     .filter(p -> p.getNumberInQueue().equals((player.getNumberInQueue() + 1) % game.getPlayersCount()))

@@ -27,12 +27,13 @@ public class Game {
     private UUID id;
 
     @Min(1)
-    @Max(8)
     private Integer playersCount;
 
     private Integer currentRound;
 
     private Integer totalRound;
+
+    private Integer lastHitPins;
 
     private boolean gameEnded;
 

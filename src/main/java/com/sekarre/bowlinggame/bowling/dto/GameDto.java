@@ -20,6 +20,8 @@ public class GameDto {
 
     private Integer totalRound;
 
+    private Integer lastHitPins;
+
     private boolean gameEnded;
 
     private String winner;

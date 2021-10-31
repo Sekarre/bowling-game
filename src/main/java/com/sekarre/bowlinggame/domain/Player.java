@@ -21,14 +21,18 @@ public class Player {
 
     private String name;
 
-    private Integer lastHitPinsCount;
+    @Builder.Default
+    private Integer thisRoundHitPinsCount = 0;
 
+    @Builder.Default
     private Integer score = 0;
 
+    @Builder.Default
     private Integer bonusStrikeScore = 0;
 
     private ScoreType scoreType;
 
+    @Builder.Default
     private Integer turnOfRound = 1;
 
     @JoinColumn(name = "game_id")

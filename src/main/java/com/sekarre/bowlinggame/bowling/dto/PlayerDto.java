@@ -18,7 +18,7 @@ public class PlayerDto {
 
     private Integer playerScore;
 
-    private Integer lastHitPinsCount;
+    private Integer thisRoundHitPinsCount;
 
     private ScoreType scoreType;
 

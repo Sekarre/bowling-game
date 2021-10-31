@@ -7,7 +7,11 @@ import java.util.UUID;
 
 public interface GameService {
 
-    NewGameDto getNewGame(Integer playersCount);
+    GameDto getNewGame(Integer playersCount);
 
     GameDto getUpdatedGame(UUID gameId);
+
+    GameDto getGame(UUID gameId);
+
+    Integer getMaxNumberOfPlayers();
 }

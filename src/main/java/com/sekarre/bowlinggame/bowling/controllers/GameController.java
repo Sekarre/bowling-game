@@ -16,13 +16,23 @@ public class GameController {
 
     private final GameService gameService;
 
+    @GetMapping("/number-of-players")
+    public ResponseEntity<Integer> getMaxNumberOfPlayers() {
+        return ResponseEntity.ok(gameService.getMaxNumberOfPlayers());
+    }
+
     @GetMapping("/new-game")
-    public ResponseEntity<NewGameDto> getNewGame(@RequestParam Integer playersCount) {
+    public ResponseEntity<GameDto> getNewGame(@RequestParam Integer playersCount) {
         return ResponseEntity.ok(gameService.getNewGame(playersCount));
     }
 
     @GetMapping("/game/{gameId}")
-    public ResponseEntity<GameDto> getGamePlayerScore(@PathVariable UUID gameId) {
+    public ResponseEntity<GameDto> getNewGame(@PathVariable UUID gameId) {
+        return ResponseEntity.ok(gameService.getGame(gameId));
+    }
+
+    @GetMapping("/game-update/{gameId}")
+    public ResponseEntity<GameDto> updateGame(@PathVariable UUID gameId) {
         return ResponseEntity.ok(gameService.getUpdatedGame(gameId));
     }
 }

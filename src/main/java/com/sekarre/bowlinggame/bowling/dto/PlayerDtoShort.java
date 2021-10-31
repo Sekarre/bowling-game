@@ -9,9 +9,9 @@ import lombok.*;
 @Builder
 public class PlayerDtoShort {
 
-    private Long id;
-
     private String name;
 
     private Integer turnOfRound;
+
+    private Integer thisRoundHitPinsCount;
 }
